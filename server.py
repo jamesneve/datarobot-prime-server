@@ -6,6 +6,7 @@ import json
 import os
 import pandas
 import prime as prime  # DataRobot Prime module
+import numpy as np
 
 
 @get('/status')
@@ -47,7 +48,7 @@ def _run_predict(key='id'):
     ds = prime.add_missing_indicators(ds)
     ds = prime.impute_values(ds)
     ds = prime.combine_small_levels(ds)
-    predicts = prime.predict_dataframe(ds)
+    predicts = 1/(1 + np.exp(-prime.predict_dataframe(ds)))
 
     if key in params[0]:
         result = [{key: params[i][key], 'predict': predicts[i]} for i in range(predicts.size)]

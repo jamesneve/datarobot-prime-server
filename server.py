@@ -5,9 +5,8 @@ from bottle import get, post, run, request, response, error, BaseRequest
 import json
 import os
 import pandas
-import prime as prime  # DataRobot Prime module
 import numpy as np
-
+import importlib
 
 @get('/status')
 def get_status():
@@ -24,21 +23,29 @@ def post_predict():
     """
     return _run_predict()
 
-
-@post('/predict/<key>')
-def post_predict_key(key='id'):
-    """Run DataRobot Prime with key.
+@post('/predict/<model>')
+def post_predict_model(model='prime'):
+    """Run DataRobot Prime with model.
 
     @json {Object} - must include all of the columns for prediction
     """
-    return _run_predict(key)
+    return _run_predict(model)
+
+@post('/predict/<model>/<key>')
+def post_predict_model(model='prime', key='id'):
+    """Run DataRobot Prime with key and model.
+
+    @json {Object} - must include all of the columns for prediction
+    """
+    return _run_predict(model, key)
 
 
-def _run_predict(key='id'):
+def _run_predict(model='prime', key='id'):
     """Run DataRobot prime by POST method.
 
     @json {Object} - must include all of the columns for prediction
     """
+    prime = importlib.import_module(model)
     params = _to_list(request.json)
     ds = pandas.DataFrame.from_dict(params)
     ds = prime.rename_columns(ds)
